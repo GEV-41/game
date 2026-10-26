@@ -4,117 +4,133 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NIGHTFALL — Co-op Horror</title>
+  <title>NIGHTFALL | Abandoned Hospital</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="menu" class="overlay">
-    <div class="panel">
-      <div class="eyebrow">CO-OP SURVIVAL HORROR</div>
-      <h1>NIGHTFALL<span>.</span></h1>
-      <p class="subtitle">The school should have been empty.</p>
-
-      <label for="playerName">CALLSIGN</label>
-      <input id="playerName" maxlength="16" value="HDP_Gamer">
-
-      <button id="soloBtn" class="primary">ENTER THE SCHOOL</button>
-
-      <div class="divider"><span>PLAY WITH A FRIEND</span></div>
-      <button id="hostBtn">HOST A ROOM</button>
-
-      <div class="joinrow">
-        <input id="roomCode" placeholder="Friend's room code">
-        <button id="joinBtn">JOIN</button>
-      </div>
-
-      <p id="netStatus" class="status">
-        Solo mode is ready. Multiplayer uses a peer-to-peer connection.
-      </p>
-
-      <div class="controls">
-        WASD move · Mouse look · Shift sprint · F flashlight · E interact · Esc release mouse
-      </div>
-    </div>
-  </div>
-
-  <div id="game">
+  <div id="game-shell">
     <canvas id="scene"></canvas>
-    <div class="vignette"></div>
 
-    <div class="topbar">
-      <div class="brand">NIGHTFALL<span>.</span> <small>CO-OP</small></div>
-      <div id="roomBadge">SOLO SESSION</div>
-    </div>
+    <div id="vignette"></div>
+    <div id="damage-flash"></div>
 
-    <div class="objective">
-      <div class="eyebrow">CURRENT OBJECTIVE</div>
-      <strong id="objectiveText">Find the key</strong>
-      <small id="objectiveHint">Search the abandoned school.</small>
-    </div>
+    <header id="top-hud" class="hud hidden">
+      <div class="game-brand">NIGHTFALL <span>HOSPITAL</span></div>
+      <div id="floor-label">GROUND FLOOR</div>
+      <div id="network-status">OFFLINE</div>
+    </header>
 
-    <div class="teammates">
-      <div class="eyebrow">SURVIVORS</div>
-      <div id="playerList">
-        <div class="playerline"><i></i><span>HDP_Gamer</span><b>YOU</b></div>
+    <aside id="mission-panel" class="hud hidden">
+      <h2>CURRENT MISSION</h2>
+      <p id="objective">Find the missing patient files.</p>
+      <div class="mission-progress">
+        <div id="mission-fill"></div>
+      </div>
+      <p id="mission-count">Patient files: 0 / 5</p>
+      <p id="mission-hint">Explore the hospital. Avoid the ghosts.</p>
+    </aside>
+
+    <div id="center-reticle" class="hud hidden">+</div>
+    <div id="interaction-prompt" class="hud hidden">E — INTERACT</div>
+    <div id="toast" class="hud"></div>
+
+    <aside id="status-panel" class="hud hidden">
+      <div class="status-row">
+        <span>HEALTH</span>
+        <span id="health-value">100</span>
+      </div>
+      <div class="bar"><div id="health-fill"></div></div>
+
+      <div class="status-row">
+        <span>STAMINA</span>
+        <span id="stamina-value">100</span>
+      </div>
+      <div class="bar"><div id="stamina-fill"></div></div>
+
+      <div class="status-row">
+        <span>FLASHLIGHT</span>
+        <span id="battery-value">100%</span>
+      </div>
+      <div class="bar"><div id="battery-fill"></div></div>
+    </aside>
+
+    <aside id="weapon-panel" class="hud hidden">
+      <div class="weapon-title">EQUIPMENT</div>
+      <button class="weapon-slot selected" data-weapon="knife">
+        <span>1</span> Knife
+      </button>
+      <button class="weapon-slot" data-weapon="flare">
+        <span>2</span> Stun flare
+      </button>
+      <button class="weapon-slot" data-weapon="medkit">
+        <span>3</span> Medkit
+      </button>
+      <p id="weapon-description">Close-range defense</p>
+    </aside>
+
+    <aside id="control-help" class="hud hidden">
+      <p><kbd>W A S D</kbd> Move</p>
+      <p><kbd>SHIFT</kbd> Sprint</p>
+      <p><kbd>F</kbd> Flashlight</p>
+      <p><kbd>E</kbd> Interact</p>
+      <p><kbd>1 2 3</kbd> Equipment</p>
+      <p><kbd>Left Click</kbd> Use item</p>
+      <p><kbd>ESC</kbd> Release mouse</p>
+    </aside>
+
+    <section id="menu" class="screen">
+      <div class="menu-content">
+        <p class="eyebrow">SOME DOORS SHOULD STAY CLOSED</p>
+        <h1>NIGHT<span>FALL</span></h1>
+        <p class="subtitle">THE ABANDONED HOSPITAL</p>
+        <p class="story">
+          The hospital closed years ago. Five patient files remain missing.
+          Find them, restore the power, and escape before something finds you.
+        </p>
+
+        <label for="player-name">YOUR NAME</label>
+        <input id="player-name" maxlength="18" placeholder="Survivor" value="Survivor">
+
+        <button id="soloBtn" class="primary-button">ENTER THE HOSPITAL</button>
+
+        <div class="menu-footer">
+          <span>FIRST-PERSON HORROR</span>
+          <span>EXPLORATION · SURVIVAL</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="pause-screen" class="screen hidden">
+      <div class="dialog">
+        <p class="eyebrow">TAKE A BREATH</p>
+        <h2>PAUSED</h2>
+        <button id="resumeBtn" class="primary-button">RESUME</button>
+        <button id="restartBtn" class="secondary-button">RESTART MISSION</button>
+      </div>
+    </section>
+
+    <section id="end-screen" class="screen hidden">
+      <div class="dialog">
+        <p class="eyebrow" id="end-eyebrow">MISSION REPORT</p>
+        <h2 id="end-title">YOU ESCAPED</h2>
+        <p id="end-message">The hospital is behind you. For now.</p>
+        <button id="end-restart" class="primary-button">PLAY AGAIN</button>
+        <button id="return-menu" class="secondary-button">MAIN MENU</button>
+      </div>
+    </section>
+
+    <div id="jumpscare" class="hidden" aria-hidden="true">
+      <div class="scare-face">
+        <div class="scare-eyes"><i></i><i></i></div>
+        <div class="scare-mouth"></div>
       </div>
     </div>
 
-    <div class="centerPrompt" id="prompt"></div>
-    <div id="toast"></div>
-
-    <div class="bottomleft">
-      <div class="stat">
-        <span>♥</span>
-        <div class="bar"><i id="healthBar"></i></div>
-        <b id="healthNum">100</b>
-      </div>
-
-      <div class="stat stamina">
-        <span>⚡</span>
-        <div class="bar"><i id="staminaBar"></i></div>
-      </div>
-
-      <div class="help">
-        WASD MOVE · SHIFT SPRINT · F FLASHLIGHT · E INTERACT
-      </div>
-    </div>
-
-    <div class="inventory">
-      <div class="slot active"><span>▰</span><small>F</small><label>FLASHLIGHT</label></div>
-      <div class="slot"><span>⚿</span><small>E</small><label>KEY</label></div>
-      <div class="slot"><span>＋</span><small>Q</small><label>MEDKIT</label></div>
-    </div>
-
-    <div class="chat">
-      <div class="chathead">
-        TEAM COMMS <span id="connectionDot">● SOLO</span>
-      </div>
-      <div id="chatMessages">
-        <p class="systemmsg">You hear rain tapping against the windows...</p>
-      </div>
-      <form id="chatForm">
-        <input id="chatInput" maxlength="140" placeholder="Message your team…">
-        <button aria-label="Send message">➤</button>
-      </form>
-    </div>
-
-    <div id="crosshair">+</div>
-    <div id="damageFlash"></div>
-
-    <div id="winScreen" class="overlay hidden">
-      <div class="panel">
-        <div class="eyebrow">MISSION COMPLETE</div>
-        <h1>YOU MADE IT<span>.</span></h1>
-        <p>The school is behind you. For now.</p>
-        <button id="againBtn" class="primary">PLAY AGAIN</button>
-        <button id="menuBtn">BACK TO MENU</button>
-      </div>
-    </div>
+    <div id="bottom-message" class="hud hidden"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
-
