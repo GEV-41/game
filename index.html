@@ -1,35 +1,126 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PAINTSTRIKE MULTIPLAYER</title>
+  <title>PAINTSTRIKE | Multiplayer Arena</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="menu">
-    <h1>PAINTSTRIKE</h1>
-    <p>MULTIPLAYER ARENA</p>
-    <input id="playerName" maxlength="16" placeholder="Enter player name">
-    <button id="playButton">PLAY ONLINE</button>
-    <p id="status">Ready to connect</p>
+  <div id="game">
+    <div id="topbar">
+      <div class="brand">
+        <span class="brand-icon">P</span>
+        <div>
+          <strong>PAINT<span>STRIKE</span></strong>
+          <small>COMPETITIVE PAINTBALL</small>
+        </div>
+      </div>
+      <div class="match-info">
+        <span class="live-dot"></span> PRACTICE MATCH
+        <strong id="timer">03:00</strong>
+      </div>
+      <div class="team-score">
+        <div class="team blue-team"><span>BLUE</span><b id="blueScore">0</b></div>
+        <div class="score-divider">:</div>
+        <div class="team red-team"><b id="redScore">0</b><span>RED</span></div>
+      </div>
+    </div>
+
+    <div id="world"></div>
+
+    <div id="crosshair">
+      <i class="ch top"></i><i class="ch bottom"></i>
+      <i class="ch left"></i><i class="ch right"></i>
+      <span></span>
+    </div>
+
+    <div id="hitmarker">✕</div>
+    <div id="damage-flash"></div>
+    <div id="announcement"></div>
+
+    <div id="left-hud">
+      <div class="hud-label">PLAYER STATUS</div>
+      <div class="player-card">
+        <div class="player-avatar">P1</div>
+        <div class="player-details">
+          <strong>PAINT RUNNER</strong>
+          <span>BLUE SQUAD · LEVEL <b id="level">01</b></span>
+        </div>
+      </div>
+      <div class="stat-row"><span>HEALTH</span><b id="healthText">100 / 100</b></div>
+      <div class="bar"><div id="healthBar" class="health-fill"></div></div>
+      <div class="stat-row"><span>STAMINA</span><b id="staminaText">100%</b></div>
+      <div class="bar"><div id="staminaBar" class="stamina-fill"></div></div>
+      <div id="statusMessage">READY FOR ACTION</div>
+    </div>
+
+    <div id="right-hud">
+      <div class="hud-label">COMBAT FEED</div>
+      <div id="killFeed"></div>
+    </div>
+
+    <div id="bottom-hud">
+      <div class="movement-hint">
+        <div class="key-row"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>MOVE</span></div>
+        <div class="key-row"><kbd>SHIFT</kbd><span>SPRINT</span><kbd>SPACE</kbd><span>JUMP</span></div>
+        <div class="key-row"><kbd>R</kbd><span>RELOAD</span><kbd>ESC</kbd><span>PAUSE</span></div>
+      </div>
+      <div class="ammo-panel">
+        <div class="weapon-label"><span class="weapon-dot"></span> MARKER MK-I <span class="weapon-type">SEMI-AUTO</span></div>
+        <div class="ammo-number"><strong id="ammo">20</strong><span>/ 20<br>PAINTBALLS</span></div>
+        <div class="ammo-track"><div id="ammoBar"></div></div>
+        <div class="reload-text" id="reloadText">LMB FIRE <span>·</span> R RELOAD</div>
+      </div>
+    </div>
+
+    <div id="startScreen" class="screen">
+      <div class="screen-card">
+        <div class="eyebrow"><span></span> THE ARENA IS LIVE <span></span></div>
+        <h1>PAINT<span>STRIKE</span></h1>
+        <p class="subtitle">LOCK. AIM. SPLASH.</p>
+        <div class="arena-preview">
+          <div class="preview-orb blue-orb"></div>
+          <div class="preview-center">VS</div>
+          <div class="preview-orb red-orb"></div>
+        </div>
+        <p class="intro">Enter the arena. Outplay the opposition.<br>Make every shot count.</p>
+        <button id="playButton">ENTER THE ARENA <span>→</span></button>
+        <div class="feature-line">
+          <span>3D ARENA</span><i></i><span>TEAM COMBAT</span><i></i><span>FREE PLAY</span>
+        </div>
+        <small class="notice">PRACTICE MODE · BOTS INCLUDED · INTERNET REQUIRED</small>
+      </div>
+    </div>
+
+    <div id="pauseScreen" class="screen hidden">
+      <div class="screen-card compact">
+        <div class="eyebrow">MATCH CONTROL</div>
+        <h2>PAUSED<span>.</span></h2>
+        <p class="intro">Take a breath. The arena awaits.</p>
+        <button id="resumeButton">RESUME MATCH →</button>
+        <button id="restartButton" class="secondary-button">RESTART MATCH</button>
+        <div class="notice">PRESS ESC TO RESUME</div>
+      </div>
+    </div>
+
+    <div id="endScreen" class="screen hidden">
+      <div class="screen-card compact">
+        <div class="eyebrow">MATCH COMPLETE</div>
+        <h2 id="endTitle">MATCH OVER<span>.</span></h2>
+        <p id="endSummary" class="intro">Good game.</p>
+        <div class="result-stats">
+          <div><strong id="finalKills">0</strong><span>ELIMINATIONS</span></div>
+          <div><strong id="finalAccuracy">0%</strong><span>ACCURACY</span></div>
+        </div>
+        <button id="againButton">PLAY AGAIN →</button>
+      </div>
+    </div>
+
+    <div id="toast"></div>
   </div>
 
-  <div id="hud" hidden>
-    <div class="topbar">
-      <span>RED: <b id="redScore">0</b></span>
-      <span>BLUE: <b id="blueScore">0</b></span>
-      <span id="playerCount">Players: 0</span>
-    </div>
-    <div id="crosshair">+</div>
-    <div class="bottom">
-      <div>HEALTH <b id="healthText">100</b></div>
-      <div id="healthBar"><div id="healthFill"></div></div>
-      <p>WASD: Move · Mouse: Aim · Click: Shoot · Shift: Sprint</p>
-    </div>
-  </div>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script type="module" src="game.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
