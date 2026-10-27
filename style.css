@@ -184,3 +184,68 @@ button { font: inherit; }
   .arena-preview { height: 58px; }
   .intro { margin: 12px 0; }
 }
+
+/* PAINTSTRIKE multiplayer menu */
+#multiplayer-menu {
+  width: min(360px, 90%);
+  margin: 20px auto;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #eef8ff;
+  background: rgba(13, 25, 39, 0.94);
+  border: 1px solid rgba(72, 190, 255, 0.5);
+  border-radius: 12px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+#multiplayer-menu h2 {
+  margin: 0 0 8px;
+  font-size: 19px;
+  letter-spacing: 1.5px;
+}
+
+#multiplayer-menu p {
+  font-size: 13px;
+  color: #b9cbd9;
+}
+
+#multiplayer-menu button,
+#multiplayer-menu input {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  font: inherit;
+}
+
+#multiplayer-menu button {
+  color: white;
+  background: #087ec1;
+  border: 1px solid #50c5ff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#multiplayer-menu button:hover {
+  background: #109fe9;
+}
+
+#multiplayer-menu input {
+  color: #172636;
+  background: #f2f8fc;
+  border: 1px solid #8ca9bd;
+}
+
+#multiplayer-status {
+  overflow-wrap: anywhere;
+}
+
+#room-code-display {
+  color: #6dd6ff !important;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
