@@ -1,401 +1,139 @@
-
-* {
-  box-sizing: border-box;
-}
-
-:root {
-  --blue: #35a7ff;
-  --orange: #ff8b35;
-  --dark: #080d17;
-  --white: #f4f7ff;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
   overflow: hidden;
   background: #080d17;
-  color: var(--white);
-  font-family: Arial, Helvetica, sans-serif;
+  color: #f4f7ff;
+  font-family: Arial, sans-serif;
 }
 
-#game {
-  position: fixed;
-  inset: 0;
-}
+#game { position: fixed; inset: 0; }
+#game canvas { display: block; width: 100%; height: 100%; }
+.hidden { display: none !important; }
 
-#game canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.overlay {
+#menu {
   position: fixed;
   inset: 0;
   z-index: 5;
   display: grid;
   place-items: center;
   padding: 20px;
-  background:
-    radial-gradient(ellipse at center, rgba(20, 44, 72, .55), transparent 65%),
-    linear-gradient(135deg, rgba(4, 9, 18, .88), rgba(4, 9, 18, .68));
+  background: radial-gradient(ellipse, #17304dcc, #050914ee);
 }
 
-.menu-card {
-  width: min(540px, 100%);
-  padding: 42px 34px;
+.card {
+  width: min(520px, 100%);
+  padding: 40px 30px;
   text-align: center;
-  background: rgba(8, 15, 29, .93);
-  border: 1px solid rgba(103, 163, 226, .32);
+  border: 1px solid #52708f80;
   border-radius: 16px;
-  box-shadow: 0 24px 90px rgba(0, 0, 0, .45);
+  background: #091322f5;
+  box-shadow: 0 20px 80px #0009;
 }
 
 .eyebrow {
-  color: #8ca9c9;
-  font-size: 11px;
-  font-weight: 800;
+  color: #91a9c4;
   letter-spacing: 4px;
-}
-
-h1 {
-  margin: 18px 0 8px;
-  font-size: clamp(38px, 8vw, 64px);
-  letter-spacing: -2px;
-  font-weight: 900;
-}
-
-h1 span {
-  color: var(--blue);
-}
-
-.subtitle {
-  margin: 0;
-  color: #aab9cc;
-  letter-spacing: 2px;
-}
-
-.team-preview {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 34px 0;
   font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1px;
 }
 
-.blue-dot,
-.orange-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+h1 { font-size: clamp(40px, 8vw, 64px); margin: 18px 0; }
+h1 span { color: #35a7ff; }
+
+.teams {
+  margin: 30px 0;
+  font-weight: bold;
+  font-size: 13px;
 }
 
-.blue-dot {
-  background: var(--blue);
-  box-shadow: 0 0 12px var(--blue);
-}
-
-.orange-dot {
-  background: var(--orange);
-  box-shadow: 0 0 12px var(--orange);
-}
-
-.versus {
-  color: #70819a;
-  margin: 0 8px;
-}
+.teams b { color: #9eafc3; margin: 0 12px; }
 
 button {
   width: 100%;
-  padding: 17px 20px;
+  padding: 17px;
   border: 0;
-  border-radius: 8px;
-  color: #03101e;
-  background: linear-gradient(90deg, #48b5ff, #76d5ff);
-  font-size: 15px;
+  border-radius: 7px;
+  background: #42b5ff;
+  color: #061322;
   font-weight: 900;
   letter-spacing: 2px;
   cursor: pointer;
-  transition: transform .15s, filter .15s;
 }
 
-button:hover {
-  filter: brightness(1.12);
-  transform: translateY(-2px);
-}
+button:disabled { opacity: .5; cursor: not-allowed; }
 
-button:disabled {
-  cursor: not-allowed;
-  filter: grayscale(1);
-  transform: none;
-}
+#connection { color: #9eb1c9; font-size: 12px; }
+.card small { display: block; margin-top: 22px; color: #94a7bf; line-height: 1.8; }
 
-#connection {
-  min-height: 16px;
-  color: #a8bad0;
-  font-size: 12px;
-}
+#hud { position: fixed; inset: 0; pointer-events: none; text-shadow: 0 2px 4px #000; }
 
-.controls-note {
-  color: #73869e;
-  font-size: 11px;
-  line-height: 1.8;
-  margin: 24px 0 0;
-}
-
-#hud {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  text-shadow: 0 2px 5px #000;
-}
-
-.topbar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 28px;
-  background: linear-gradient(rgba(3, 7, 14, .8), transparent);
+  padding: 20px 25px;
+  background: linear-gradient(#000a, transparent);
 }
 
-.score {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 2px;
-}
-
-.score strong {
-  font-size: 28px;
-}
-
-.blue-score {
-  color: var(--blue);
-}
-
-.orange-score {
-  color: var(--orange);
-}
-
-.match-title {
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: 3px;
-}
-
-.match-title small {
-  display: block;
-  margin-top: 5px;
-  color: #9eafc3;
-  font-size: 9px;
-  text-align: center;
-  letter-spacing: 2px;
-}
-
-.player-info {
-  position: absolute;
-  left: 28px;
-  bottom: 30px;
-  width: 220px;
-}
-
-.team-label {
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  margin-bottom: 10px;
-}
-
-.health-track {
-  height: 9px;
-  overflow: hidden;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, .65);
-  border: 1px solid rgba(255, 255, 255, .2);
-}
-
-#healthFill {
-  width: 100%;
-  height: 100%;
-  background: #55e09b;
-  transition: width .2s;
-}
-
-.health-text {
-  margin-top: 8px;
-  color: #cbd5e1;
-  font-size: 10px;
-  letter-spacing: 1px;
-}
-
-.health-text span {
-  color: white;
-  font-weight: 900;
-}
+header strong { font-size: 25px; margin-left: 8px; }
+.blue { color: #35a7ff; font-weight: bold; }
+.orange { color: #ff8b35; font-weight: bold; }
+.title { text-align: center; font-weight: 900; letter-spacing: 3px; }
+.title small { display: block; font-size: 9px; margin-top: 5px; color: #9eb1c9; }
 
 .crosshair {
   position: absolute;
-  left: 50%;
   top: 50%;
-  width: 20px;
-  height: 20px;
+  left: 50%;
   transform: translate(-50%, -50%);
-}
-
-.crosshair span {
-  position: absolute;
-  background: white;
-  box-shadow: 0 0 3px #000;
-}
-
-.crosshair span:first-child {
-  width: 2px;
-  height: 20px;
-  left: 9px;
-}
-
-.crosshair span:last-child {
-  width: 20px;
-  height: 2px;
-  top: 9px;
-}
-
-.hit-marker {
-  display: none;
-  position: absolute;
-  top: calc(50% - 24px);
-  left: calc(50% - 10px);
-  font-size: 30px;
+  font-size: 26px;
   color: white;
 }
 
-.message {
+.health {
   position: absolute;
-  left: 50%;
-  top: 62%;
-  transform: translateX(-50%);
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: 2px;
-}
-
-.bottom-help {
-  position: absolute;
-  bottom: 28px;
-  left: 50%;
-  display: flex;
-  gap: 18px;
-  transform: translateX(-50%);
-  color: #e8eff9;
+  bottom: 35px;
+  left: 25px;
+  width: 200px;
   font-size: 11px;
-  font-weight: 900;
-  white-space: nowrap;
+  color: #d9e5f2;
 }
 
-.bottom-help span {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+#teamLabel { display: block; margin-bottom: 8px; letter-spacing: 2px; }
+.healthbar { height: 9px; background: #0009; margin-bottom: 8px; }
+#healthFill { width: 100%; height: 100%; background: #55e09b; }
+#healthText { font-weight: bold; }
+
+.ammo {
+  position: absolute;
+  right: 25px;
+  bottom: 30px;
+  color: #cbd8e8;
+  font-size: 11px;
+}
+
+.ammo strong { font-size: 34px; color: white; }
+#reloadText { position: absolute; right: 25px; bottom: 75px; color: #ffd16b; }
+#message { position: absolute; top: 62%; width: 100%; text-align: center; font-weight: bold; }
+#hitMarker { position: absolute; top: 47%; left: 49.5%; color: white; font-size: 28px; }
+#playerCount { position: absolute; top: 85px; right: 25px; font-size: 11px; color: #d2dfef; }
+
+.controls {
+  position: absolute;
+  bottom: 12px;
+  width: 100%;
   text-align: center;
-}
-
-.bottom-help small {
-  color: #94a7bf;
-  font-size: 8px;
-  letter-spacing: 1px;
-}
-
-.ammo-box {
-  position: absolute;
-  right: 28px;
-  bottom: 28px;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.ammo-box strong {
-  font-size: 34px;
-}
-
-.ammo-box span {
-  color: #aebdd0;
+  color: #b8c7d8;
   font-size: 10px;
-  letter-spacing: 1px;
-}
-
-.reload-text {
-  position: absolute;
-  right: 28px;
-  bottom: 75px;
-  color: #ffd16b;
-  font-size: 11px;
-  font-weight: bold;
-}
-
-.player-count {
-  position: absolute;
-  top: 92px;
-  right: 28px;
-  color: #b9c9db;
-  font-size: 10px;
-  letter-spacing: 1px;
 }
 
 @media (max-width: 600px) {
-  .menu-card {
-    padding: 30px 20px;
-  }
-
-  .topbar {
-    padding: 14px;
-  }
-
-  .match-title {
-    font-size: 10px;
-    letter-spacing: 1px;
-  }
-
-  .score {
-    gap: 5px;
-    font-size: 9px;
-  }
-
-  .score strong {
-    font-size: 20px;
-  }
-
-  .player-info {
-    left: 14px;
-    bottom: 85px;
-    width: 150px;
-  }
-
-  .bottom-help {
-    bottom: 16px;
-    gap: 10px;
-    font-size: 9px;
-  }
-
-  .ammo-box {
-    right: 14px;
-    bottom: 80px;
-  }
-
-  .ammo-box strong {
-    font-size: 25px;
-  }
+  .card { padding: 28px 18px; }
+  header { padding: 15px 10px; }
+  .title { font-size: 10px; letter-spacing: 1px; }
+  header strong { font-size: 19px; }
+  .health { left: 12px; bottom: 55px; width: 145px; }
+  .ammo { right: 12px; bottom: 55px; }
+  .controls { font-size: 8px; }
 }
