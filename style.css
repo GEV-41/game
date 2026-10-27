@@ -1,139 +1,130 @@
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
   overflow: hidden;
-  background: #080d17;
-  color: #f4f7ff;
+  background: #080b12;
+  color: white;
   font-family: Arial, sans-serif;
 }
-
-#game { position: fixed; inset: 0; }
-#game canvas { display: block; width: 100%; height: 100%; }
-.hidden { display: none !important; }
 
 #menu {
   position: fixed;
   inset: 0;
   z-index: 5;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: radial-gradient(ellipse, #17304dcc, #050914ee);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, #26334b, #101521 55%, #05070c);
 }
 
-.card {
-  width: min(520px, 100%);
-  padding: 40px 30px;
-  text-align: center;
-  border: 1px solid #52708f80;
-  border-radius: 16px;
-  background: #091322f5;
-  box-shadow: 0 20px 80px #0009;
+#menu h1 {
+  margin: 0;
+  font-size: clamp(40px, 8vw, 88px);
+  font-weight: 900;
+  letter-spacing: 7px;
+  text-shadow: 0 0 25px #278bff;
 }
 
-.eyebrow {
-  color: #91a9c4;
-  letter-spacing: 4px;
-  font-size: 11px;
+#menu p {
+  color: #9cb7dc;
+  letter-spacing: 3px;
 }
 
-h1 { font-size: clamp(40px, 8vw, 64px); margin: 18px 0; }
-h1 span { color: #35a7ff; }
-
-.teams {
-  margin: 30px 0;
-  font-weight: bold;
-  font-size: 13px;
+#playerName {
+  width: 260px;
+  margin: 22px 0 12px;
+  padding: 14px;
+  border: 1px solid #425574;
+  border-radius: 6px;
+  background: #101827;
+  color: white;
+  font-size: 16px;
 }
-
-.teams b { color: #9eafc3; margin: 0 12px; }
 
 button {
-  width: 100%;
-  padding: 17px;
+  padding: 15px 36px;
   border: 0;
-  border-radius: 7px;
-  background: #42b5ff;
-  color: #061322;
-  font-weight: 900;
-  letter-spacing: 2px;
+  border-radius: 6px;
+  background: #147cff;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
   cursor: pointer;
 }
 
-button:disabled { opacity: .5; cursor: not-allowed; }
-
-#connection { color: #9eb1c9; font-size: 12px; }
-.card small { display: block; margin-top: 22px; color: #94a7bf; line-height: 1.8; }
-
-#hud { position: fixed; inset: 0; pointer-events: none; text-shadow: 0 2px 4px #000; }
-
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 25px;
-  background: linear-gradient(#000a, transparent);
+button:hover {
+  background: #4295ff;
 }
 
-header strong { font-size: 25px; margin-left: 8px; }
-.blue { color: #35a7ff; font-weight: bold; }
-.orange { color: #ff8b35; font-weight: bold; }
-.title { text-align: center; font-weight: 900; letter-spacing: 3px; }
-.title small { display: block; font-size: 9px; margin-top: 5px; color: #9eb1c9; }
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
 
-.crosshair {
-  position: absolute;
+#status {
+  min-height: 20px;
+  font-size: 13px;
+  letter-spacing: 0 !important;
+}
+
+#hud[hidden] {
+  display: none;
+}
+
+.topbar {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  display: flex;
+  gap: 24px;
+  padding: 14px 22px;
+  transform: translateX(-50%);
+  background: #080b12dd;
+  border: 1px solid #33435e;
+  border-radius: 8px;
+}
+
+#crosshair {
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 26px;
-  color: white;
+  font-size: 30px;
+  font-weight: bold;
+  pointer-events: none;
 }
 
-.health {
-  position: absolute;
-  bottom: 35px;
-  left: 25px;
-  width: 200px;
-  font-size: 11px;
-  color: #d9e5f2;
+.bottom {
+  position: fixed;
+  bottom: 15px;
+  left: 20px;
+  width: min(380px, calc(100vw - 40px));
+  padding: 14px;
+  background: #080b12dd;
+  border: 1px solid #33435e;
+  border-radius: 8px;
 }
 
-#teamLabel { display: block; margin-bottom: 8px; letter-spacing: 2px; }
-.healthbar { height: 9px; background: #0009; margin-bottom: 8px; }
-#healthFill { width: 100%; height: 100%; background: #55e09b; }
-#healthText { font-weight: bold; }
-
-.ammo {
-  position: absolute;
-  right: 25px;
-  bottom: 30px;
-  color: #cbd8e8;
-  font-size: 11px;
+#healthBar {
+  height: 12px;
+  margin-top: 8px;
+  overflow: hidden;
+  background: #343a46;
+  border-radius: 6px;
 }
 
-.ammo strong { font-size: 34px; color: white; }
-#reloadText { position: absolute; right: 25px; bottom: 75px; color: #ffd16b; }
-#message { position: absolute; top: 62%; width: 100%; text-align: center; font-weight: bold; }
-#hitMarker { position: absolute; top: 47%; left: 49.5%; color: white; font-size: 28px; }
-#playerCount { position: absolute; top: 85px; right: 25px; font-size: 11px; color: #d2dfef; }
-
-.controls {
-  position: absolute;
-  bottom: 12px;
+#healthFill {
   width: 100%;
-  text-align: center;
-  color: #b8c7d8;
-  font-size: 10px;
+  height: 100%;
+  background: #28d878;
+  transition: width 0.2s;
 }
 
-@media (max-width: 600px) {
-  .card { padding: 28px 18px; }
-  header { padding: 15px 10px; }
-  .title { font-size: 10px; letter-spacing: 1px; }
-  header strong { font-size: 19px; }
-  .health { left: 12px; bottom: 55px; width: 145px; }
-  .ammo { right: 12px; bottom: 55px; }
-  .controls { font-size: 8px; }
+.bottom p {
+  color: #b5c3d8;
+  font-size: 11px;
 }
