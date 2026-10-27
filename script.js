@@ -38,27 +38,28 @@ const raycaster = new THREE.Raycaster();
 raycaster.far = 85;
 
 const MAT = {
-  blue: new THREE.MeshStandardMaterial({
-    color: "#168bfa", roughness: .32, metalness: .08
-  }),
-  blueLight: new THREE.MeshStandardMaterial({
-    color: "#6ddcff", emissive: "#087cbb", emissiveIntensity: .6
-  }),
-  red: new THREE.MeshStandardMaterial({
-    color: "#e83e59", roughness: .34
-  }),
-  floor: new THREE.MeshStandardMaterial({
-    color: "#344c50",
-    roughness: .94
-}),
-dark: new THREE.MeshStandardMaterial({
-    color: "#192735",
-    roughness: .65,
-    metalness: .16
-}),
-  white: new THREE.MeshStandardMaterial({
-    color: "#d9e4e9", roughness: .8
-  }),
+    blue: new THREE.MeshStandardMaterial({
+        color: "#168bfa", roughness: .32, metalness: .08
+    }),
+    blueLight: new THREE.MeshStandardMaterial({
+        color: "#6dcfff", emissive: "#087cbb", emissiveIntensity: .3
+    }),
+    red: new THREE.MeshStandardMaterial({
+        color: "#e83e59", roughness: .34
+    }),
+    floor: new THREE.MeshStandardMaterial({
+        color: "#344c50", roughness: .94
+    }),
+    dark: new THREE.MeshStandardMaterial({
+        color: "#192735", roughness: .65, metalness: .16
+    }),
+    white: new THREE.MeshStandardMaterial({
+        color: "#d9e4e9", roughness: .8
+    }),
+    yellow: new THREE.MeshStandardMaterial({
+        color: "#f6c95c", roughness: .45
+    })
+};
   yellow: new THREE.MeshStandardMaterial({
     color: "#f6c95c", roughness: .45
   })
