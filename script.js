@@ -48,10 +48,14 @@ const MAT = {
     color: "#e83e59", roughness: .34
   }),
   floor: new THREE.MeshStandardMaterial({
-    color: "#344c50", roughness: .94
-  }),e
-    color: "#192735", roughness: .65, metalness: .16
-  }),
+    color: "#344c50",
+    roughness: .94
+}),
+dark: new THREE.MeshStandardMaterial({
+    color: "#192735",
+    roughness: .65,
+    metalness: .16
+}),
   white: new THREE.MeshStandardMaterial({
     color: "#d9e4e9", roughness: .8
   }),
