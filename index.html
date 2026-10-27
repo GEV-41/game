@@ -85,6 +85,38 @@
           <div class="preview-center">VS</div>
           <div class="preview-orb red-orb"></div>
         </div>
+        
+<div id="multiplayer-menu">
+  <h2>ONLINE MULTIPLAYER</h2>
+  <p>Create a room or join a friend's match.</p>
+
+  <button id="create-room-btn" type="button">
+    CREATE ROOM
+  </button>
+
+  <div class="room-join">
+    <input
+      id="room-code-input"
+      type="text"
+      placeholder="Enter room code"
+      maxlength="12"
+      autocomplete="off"
+    />
+    <button id="join-room-btn" type="button">
+      JOIN ROOM
+    </button>
+  </div>
+
+  <p id="multiplayer-status" role="status">
+    Not connected
+  </p>
+
+  <p id="room-code-display"></p>
+  <button id="copy-room-btn" type="button" hidden>
+    COPY ROOM CODE
+  </button>
+</div>
+
         <p class="intro">Enter the arena. Outplay the opposition.<br>Make every shot count.</p>
         <button id="playButton">ENTER THE ARENA <span>→</span></button>
         <div class="feature-line">
