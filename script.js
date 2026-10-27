@@ -49,8 +49,7 @@ const MAT = {
   }),
   floor: new THREE.MeshStandardMaterial({
     color: "#344c50", roughness: .94
-  }),
-  dark: new THREE.MeshStandardMaterial({
+  }),e
     color: "#192735", roughness: .65, metalness: .16
   }),
   white: new THREE.MeshStandardMaterial({
@@ -1220,3 +1219,350 @@ function animate() {
 updateHUD();
 camera.position.set(0, PLAYER_HEIGHT, 16);
 animate();
+
+/* ==========================================================
+   PAINTSTRIKE — PEERJS MULTIPLAYER CONNECTION
+   Append this after the existing animate(); call.
+   ========================================================== */
+
+(() => {
+  const createBtn = $("create-room-btn");
+  const joinBtn = $("join-room-btn");
+  const roomInput = $("room-code-input");
+  const status = $("multiplayer-status");
+  const codeDisplay = $("room-code-display");
+  const copyBtn = $("copy-room-btn");
+
+  if (!createBtn || !joinBtn || !roomInput || !status) {
+    console.error("Multiplayer menu elements are missing from index.html.");
+    return;
+  }
+
+  const PeerClass = window.Peer;
+  let peer = null;
+  let isHost = false;
+  let localPlayerId = "";
+  let sendTimer = null;
+
+  const connections = new Map();
+  const remotePlayers = new Map();
+
+  function setStatus(message) {
+    status.textContent = message;
+  }
+
+  function createRemotePlayer(id) {
+    if (remotePlayers.has(id)) return remotePlayers.get(id);
+
+    const group = new THREE.Group();
+
+    const isBlue = id === "host";
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: isBlue ? "#168bfa" : "#e83e59",
+      roughness: 0.55
+    });
+
+    const darkMat = new THREE.MeshStandardMaterial({
+      color: "#192735",
+      roughness: 0.6
+    });
+
+    const visorMat = new THREE.MeshStandardMaterial({
+      color: "#70e3ff",
+      emissive: "#1785bb",
+      emissiveIntensity: 0.7
+    });
+
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(0.72, 0.82, 0.42),
+      bodyMat
+    );
+    body.position.y = 1.02;
+    body.castShadow = true;
+    group.add(body);
+
+    const head = new THREE.Mesh(
+      new THREE.SphereGeometry(0.26, 14, 10),
+      darkMat
+    );
+    head.position.y = 1.63;
+    head.castShadow = true;
+    group.add(head);
+
+    const visor = new THREE.Mesh(
+      new THREE.BoxGeometry(0.38, 0.1, 0.08),
+      visorMat
+    );
+    visor.position.set(0, 1.65, -0.215);
+    group.add(visor);
+
+    const marker = new THREE.Mesh(
+      new THREE.BoxGeometry(0.14, 0.14, 0.65),
+      darkMat
+    );
+    marker.position.set(0.43, 1.12, -0.35);
+    group.add(marker);
+
+    scene.add(group);
+
+    const remote = { group, lastSeen: performance.now() };
+    remotePlayers.set(id, remote);
+
+    return remote;
+  }
+
+  function removeRemotePlayer(id) {
+    const remote = remotePlayers.get(id);
+    if (!remote) return;
+
+    scene.remove(remote.group);
+    remote.group.traverse(object => {
+      if (object.isMesh) {
+        object.geometry.dispose();
+        // Materials are shared or local; don't dispose shared materials.
+      }
+    });
+
+    remotePlayers.delete(id);
+  }
+
+  function updateRemotePlayer(id, state) {
+    if (!state || !Number.isFinite(state.x) ||
+        !Number.isFinite(state.y) || !Number.isFinite(state.z) ||
+        !Number.isFinite(state.yaw)) {
+      return;
+    }
+
+    const remote = createRemotePlayer(id);
+    remote.lastSeen = performance.now();
+
+    remote.group.position.set(state.x, state.y, state.z);
+    remote.group.rotation.y = state.yaw;
+  }
+
+  function sendToAll(message, exceptPeer = null) {
+    for (const [peerId, connection] of connections) {
+      if (peerId === exceptPeer) continue;
+      if (connection.open) {
+        try {
+          connection.send(message);
+        } catch (error) {
+          console.warn("Could not send multiplayer message:", error);
+        }
+      }
+    }
+  }
+
+  function playerStateMessage() {
+    return {
+      type: "player-state",
+      playerId: localPlayerId,
+      state: {
+        x: player.position.x,
+        y: player.position.y,
+        z: player.position.z,
+        yaw
+      }
+    };
+  }
+
+  function handleMessage(connection, message) {
+    if (!message || typeof message !== "object") return;
+
+    if (message.type === "player-state") {
+      if (typeof message.playerId !== "string" ||
+          message.playerId === localPlayerId) return;
+
+      updateRemotePlayer(message.playerId, message.state);
+
+      // The room host relays guest movement to other guests.
+      if (isHost) sendToAll(message, connection.peer);
+    }
+  }
+
+  function registerConnection(connection) {
+    connections.set(connection.peer, connection);
+
+    connection.on("open", () => {
+      setStatus("Connected to room!");
+      connection.send({ type: "welcome" });
+    });
+
+    connection.on("data", message => {
+      handleMessage(connection, message);
+    });
+
+    connection.on("close", () => {
+      connections.delete(connection.peer);
+      removeRemotePlayer(connection.peer);
+      setStatus(
+        connections.size
+          ? "Connected. Players: " + (connections.size + 1)
+          : "A player disconnected."
+      );
+    });
+
+    connection.on("error", error => {
+      console.error("Peer connection error:", error);
+      setStatus("Connection problem. Check the room code and try again.");
+    });
+  }
+
+  function startStateSync() {
+    if (sendTimer) clearInterval(sendTimer);
+
+    sendTimer = setInterval(() => {
+      if (!peer || peer.destroyed) return;
+
+      const message = playerStateMessage();
+
+      if (isHost) {
+        sendToAll(message);
+      } else {
+        const hostConnection = connections.values().next().value;
+        if (hostConnection && hostConnection.open) {
+          try {
+            hostConnection.send(message);
+          } catch (error) {
+            console.warn("Could not send player state:", error);
+          }
+        }
+      }
+    }, 50);
+  }
+
+  function createRoom() {
+    if (!PeerClass) {
+      setStatus("PeerJS did not load. Check the PeerJS script in index.html.");
+      return;
+    }
+
+    if (peer) {
+      setStatus("You already have a room or connection.");
+      return;
+    }
+
+    isHost = true;
+    localPlayerId = "host";
+
+    const roomCode = Math.random().toString(36)
+      .slice(2, 8).toUpperCase();
+
+    const roomPeerId = "paintstrike-room-" + roomCode;
+
+    setStatus("Creating room...");
+
+    try {
+      peer = new PeerClass(roomPeerId);
+    } catch (error) {
+      console.error(error);
+      setStatus("Could not create room. Please try again.");
+      peer = null;
+      return;
+    }
+
+    peer.on("open", () => {
+      codeDisplay.textContent = "ROOM CODE: " + roomCode;
+      if (copyBtn) copyBtn.hidden = false;
+      roomInput.value = roomCode;
+      setStatus("Room ready! Share the code with a friend.");
+      startStateSync();
+    });
+
+    peer.on("connection", connection => {
+      registerConnection(connection);
+      setStatus("A player is joining...");
+    });
+
+    peer.on("error", error => {
+      console.error("PeerJS room error:", error);
+
+      if (error.type === "unavailable-id") {
+        setStatus("Room code collision. Click CREATE ROOM again.");
+      } else {
+        setStatus("Could not create room: " + error.type);
+      }
+
+      if (peer && !peer.open) {
+        peer.destroy();
+        peer = null;
+      }
+    });
+  }
+
+  function joinRoom() {
+    if (!PeerClass) {
+      setStatus("PeerJS did not load. Check the PeerJS script in index.html.");
+      return;
+    }
+
+    if (peer) {
+      setStatus("You already have a room or connection.");
+      return;
+    }
+
+    const roomCode = roomInput.value.trim().toUpperCase();
+
+    if (!/^[A-Z0-9]{6}$/.test(roomCode)) {
+      setStatus("Enter the complete 6-character room code.");
+      roomInput.focus();
+      return;
+    }
+
+    isHost = false;
+    localPlayerId = "";
+
+    setStatus("Connecting to room...");
+
+    try {
+      peer = new PeerClass();
+    } catch (error) {
+      console.error(error);
+      setStatus("Could not start PeerJS. Please refresh the page.");
+      peer = null;
+      return;
+    }
+
+    peer.on("open", () => {
+      localPlayerId = peer.id;
+      const connection = peer.connect(
+        "paintstrike-room-" + roomCode,
+        { reliable: true }
+      );
+
+      registerConnection(connection);
+    });
+
+    peer.on("error", error => {
+      console.error("PeerJS join error:", error);
+      setStatus(
+        error.type === "peer-unavailable"
+          ? "Room not found. Ask the host to create it again."
+          : "Connection failed: " + error.type
+      );
+    });
+  }
+
+  createBtn.addEventListener("click", createRoom);
+  joinBtn.addEventListener("click", joinRoom);
+
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      const roomCode = roomInput.value.trim();
+
+      try {
+        await navigator.clipboard.writeText(roomCode);
+        setStatus("Room code copied: " + roomCode);
+      } catch {
+        roomInput.focus();
+        roomInput.select();
+        setStatus("Copy failed. Select the room code and copy it manually.");
+      }
+    });
+  }
+
+  window.addEventListener("beforeunload", () => {
+    if (sendTimer) clearInterval(sendTimer);
+    if (peer) peer.destroy();
+  });
+})();
