@@ -1,4 +1,3 @@
-
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -7,83 +6,66 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const PORT = process.env.PORT || 3000;
-const players = {};
-const scores = { blue: 0, orange: 0 };
-const MAX_HEALTH = 100;
-
 app.use(express.static("public"));
 
-function makePlayer(id) {
-  const blueCount = Object.values(players).filter(
-    p => p.team === "blue"
-  ).length;
-  const orangeCount = Object.values(players).filter(
-    p => p.team === "orange"
-  ).length;
-  const team = blueCount <= orangeCount ? "blue" : "orange";
+const players = {};
+const scores = { blue: 0, orange: 0 };
+
+function createPlayer(id) {
+  const blue = Object.values(players).filter(p => p.team === "blue").length;
+  const orange = Object.values(players).filter(p => p.team === "orange").length;
+  const team = blue <= orange ? "blue" : "orange";
 
   return {
     id,
-    name: "Player " + id.slice(0, 4),
     team,
     x: team === "blue" ? -8 : 8,
     y: 1.7,
-    z: Math.random() * 6 - 3,
+    z: Math.random() * 8 - 4,
     rot: 0,
-    health: MAX_HEALTH,
+    health: 100,
     alive: true,
     lastShot: 0
   };
 }
 
-function publicState() {
-  return {
-    players,
-    scores
-  };
+function broadcastState() {
+  io.emit("state", { players, scores });
 }
 
-function respawn(player) {
-  player.health = MAX_HEALTH;
-  player.alive = true;
-  player.x = player.team === "blue" ? -8 : 8;
-  player.y = 1.7;
-  player.z = Math.random() * 6 - 3;
+function respawn(p) {
+  p.health = 100;
+  p.alive = true;
+  p.x = p.team === "blue" ? -8 : 8;
+  p.y = 1.7;
+  p.z = Math.random() * 8 - 4;
   io.emit("respawn", {
-    id: player.id,
-    x: player.x,
-    y: player.y,
-    z: player.z,
-    health: player.health
+    id: p.id, x: p.x, y: p.y, z: p.z, health: 100
   });
+  broadcastState();
 }
 
 io.on("connection", socket => {
-  players[socket.id] = makePlayer(socket.id);
+  players[socket.id] = createPlayer(socket.id);
 
   socket.emit("welcome", {
     id: socket.id,
     team: players[socket.id].team,
-    state: publicState()
+    state: { players, scores }
   });
 
-  io.emit("state", publicState());
+  broadcastState();
 
   socket.on("move", data => {
     const p = players[socket.id];
     if (!p || !p.alive || !data) return;
 
-    const x = Number(data.x);
-    const z = Number(data.z);
-    const rot = Number(data.rot);
+    if (![data.x, data.z, data.rot].every(Number.isFinite)) return;
 
-    if (![x, z, rot].every(Number.isFinite)) return;
-
-    // Keep players inside the arena.
-    p.x = Math.max(-23, Math.min(23, x));
-    p.z = Math.max(-23, Math.min(23, z));
-    p.rot = rot;
+    p.x = Math.max(-27, Math.min(27, data.x));
+    p.z = Math.max(-27, Math.min(27, data.z));
+    p.rot = data.rot;
+    p.y = 1.7;
   });
 
   socket.on("shoot", data => {
@@ -97,19 +79,16 @@ io.on("connection", socket => {
     const target = data && players[data.targetId];
 
     io.emit("paintball", {
-      shooterId: socket.id,
+      shooterId: shooter.id,
       targetId: target ? target.id : null,
       from: { x: shooter.x, y: shooter.y, z: shooter.z }
     });
 
-    if (!target || !target.alive) return;
-    if (target.team === shooter.team) return;
+    if (!target || !target.alive || target.team === shooter.team) return;
 
-    // Basic range validation.
     const dx = target.x - shooter.x;
     const dz = target.z - shooter.z;
-    const distance = Math.sqrt(dx * dx + dz * dz);
-    if (distance > 45) return;
+    if (Math.hypot(dx, dz) > 45) return;
 
     target.health = Math.max(0, target.health - 25);
 
@@ -119,9 +98,9 @@ io.on("connection", socket => {
       health: target.health
     });
 
-    if (target.health <= 0) {
+    if (target.health === 0) {
       target.alive = false;
-      scores[shooter.team] += 1;
+      scores[shooter.team]++;
       io.emit("scores", scores);
 
       setTimeout(() => {
@@ -129,19 +108,18 @@ io.on("connection", socket => {
       }, 1800);
     }
 
-    io.emit("state", publicState());
+    broadcastState();
   });
 
   socket.on("disconnect", () => {
     delete players[socket.id];
-    io.emit("state", publicState());
+    broadcastState();
   });
 });
 
-setInterval(() => {
-  io.emit("state", publicState());
-}, 100);
+setInterval(broadcastState, 100);
 
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`PAINTSTRIKE is running on port ${PORT}`);
+  console.log(`PAINTSTRIKE running on port ${PORT}`);
 });
