@@ -2,49 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PAINTSTRIKE MULTIPLAYER</title>
   <link rel="stylesheet" href="style.css">
-  <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <div id="game"></div>
-
   <div id="menu">
-    <div class="card">
-      <p class="eyebrow">ONLINE TEAM ARENA</p>
-      <h1>PAINT<span>STRIKE</span></h1>
-      <p>First-person multiplayer paintball</p>
-      <div class="teams">🔵 BLUE TEAM <b>VS</b> 🟠 ORANGE TEAM</div>
-      <button id="playBtn" disabled>CONNECTING...</button>
-      <p id="connection">Connecting to server...</p>
-      <small>WASD Move · Mouse Aim · Click Shoot · R Reload · Shift Sprint</small>
+    <h1>PAINTSTRIKE</h1>
+    <p>MULTIPLAYER ARENA</p>
+    <input id="playerName" maxlength="16" placeholder="Enter player name">
+    <button id="playButton">PLAY ONLINE</button>
+    <p id="status">Ready to connect</p>
+  </div>
+
+  <div id="hud" hidden>
+    <div class="topbar">
+      <span>RED: <b id="redScore">0</b></span>
+      <span>BLUE: <b id="blueScore">0</b></span>
+      <span id="playerCount">Players: 0</span>
+    </div>
+    <div id="crosshair">+</div>
+    <div class="bottom">
+      <div>HEALTH <b id="healthText">100</b></div>
+      <div id="healthBar"><div id="healthFill"></div></div>
+      <p>WASD: Move · Mouse: Aim · Click: Shoot · Shift: Sprint</p>
     </div>
   </div>
 
-  <div id="hud" class="hidden">
-    <header>
-      <div class="blue">BLUE <strong id="blueScore">0</strong></div>
-      <div class="title">PAINTSTRIKE <small>TEAM BATTLE</small></div>
-      <div class="orange">ORANGE <strong id="orangeScore">0</strong></div>
-    </header>
-
-    <div class="crosshair">+</div>
-    <div id="hitMarker"></div>
-
-    <div class="health">
-      <b id="teamLabel">TEAM</b>
-      <div class="healthbar"><div id="healthFill"></div></div>
-      HEALTH <span id="healthText">100</span>
-    </div>
-
-    <div class="ammo"><strong id="ammoText">20</strong> / 20 AMMO</div>
-    <div id="reloadText"></div>
-    <div id="message"></div>
-    <div id="playerCount">PLAYERS: 1</div>
-    <div class="controls">WASD MOVE · CLICK SHOOT · R RELOAD · SHIFT SPRINT · ESC UNLOCK</div>
-  </div>
-
+  <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="game.js"></script>
 </body>
 </html>
