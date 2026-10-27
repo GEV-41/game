@@ -63,7 +63,6 @@ const MAT = {
   yellow: new THREE.MeshStandardMaterial({
     color: "#f6c95c", roughness: .45
   })
-};
 
 const hemi = new THREE.HemisphereLight("#d9f0ff", "#435343", 2.0);
 scene.add(hemi);
